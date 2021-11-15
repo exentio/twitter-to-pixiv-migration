@@ -3,28 +3,24 @@ import datetime, time, re
 from pixivpy3 import AppPixivAPI
 from true_key import REFRESH_TOKEN, API_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKEN
 
-# login
-pixiv_api = AppPixivAPI()
-pixiv_api.auth(refresh_token=REFRESH_TOKEN)
-
+# twitterの認証
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
 auth.set_access_token(ACCESS_TOKEN, SECRET_ACCESS_TOKEN)
-
 twitter_api = tweepy.API(auth)
-search_user = 'genshi_hobby'
 
-following_user_num_id_list = twitter_api.friends_ids(search_user)
-following_user_num_id_list_len = len(following_user_num_id_list)
+search_user = 'ここに入れるユーザーのフォローユーザーのtwitterプロフィールからpixivアカウントを探す'
 loop_count = 0
 split_user_id = ''
-# pixivpyの使用上フォローできなかったユーザー
+follow_user_id_list = []
 could_not_follow_user = []
+print_str = ''
+# フォローユーザーの取得
+following_user_id_list = twitter_api.friends_ids(search_user)
 
-for item in following_user_num_id_list:
+for item in following_user_id_list:
   try:
+    loop_count += 1
     twitter_id = twitter_api.get_user(item).screen_name
-
-    # プロフィール情報の処理
     user_profile = twitter_api.get_user(twitter_id)
 
     # プロフィールにwebsiteがある場合のみリストに追加
@@ -33,21 +29,25 @@ for item in following_user_num_id_list:
       # website取得
       profile_website_url = user_profile.entities['url']['urls'][0]['expanded_url']
 
-      loop_count += 1
-      # print(str(loop_count) + '/' + str(following_user_num_id_list_len))
-      if('pixiv' in profile_website_url):
-        if((not ('pixiv.me' in profile_website_url))):
+      # apiの仕様上pixiv.meのurlはuseridを取得できないため除外して別リストに保存
+      if 'pixiv' in profile_website_url:
+        if not ('pixiv.me' in profile_website_url):
           split_user_id = re.sub(r"\D", "", profile_website_url)
-          pixiv_api.user_follow_add(split_user_id)
+          follow_user_id_list.append(split_user_id)
+          print_str = twitter_id + ' ID: ' + split_user_id
 
         else:
           could_not_follow_user.append(twitter_id)
-          print('追加できなかったUser ' + str(could_not_follow_user))
+          print_str = '追加できなかったUser: ' + twitter_id
 
+      else:
+        print_str = twitter_id
 
-      print(str(loop_count) + '/' + str(following_user_num_id_list_len) + ' ' + twitter_id + ' ID:' + split_user_id)
-      split_user_id = ''
+    else:
+      print_str = 'Websiteなし: ' + twitter_id
 
+    print(str(loop_count) + '/' + str(len(following_user_id_list)) + ' ' + print_str)
+    split_user_id = ''
 
   except tweepy.TweepError as e:
       print(e)
@@ -58,6 +58,20 @@ for item in following_user_num_id_list:
 
       else:
         break
+
+# pixivの認証
+pixiv_api = AppPixivAPI()
+pixiv_api.auth(refresh_token=REFRESH_TOKEN)
+
+# pixivのフォロー
+loop_count = 0
+print('フォローの開始')
+for item in follow_user_id_list:
+  # 僕の高専の寮の回線が遅いので1回ごとに10秒sleep
+  time.sleep(10)
+  pixiv_api.user_follow_add(item)
+  loop_count += 1
+  print(str(loop_count) + '/' + str(len(follow_user_id_list)) + ' ' + item)
 
 print('pixivpyの仕様上フォローできなかったユーザー')
 print(could_not_follow_user)
