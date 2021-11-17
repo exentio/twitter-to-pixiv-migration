@@ -1,7 +1,7 @@
 import tweepy
 import datetime, time, re
 from pixivpy3 import AppPixivAPI
-from true_key import REFRESH_TOKEN, API_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKEN
+from key import REFRESH_TOKEN, API_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKEN
 
 # twitterの認証
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
