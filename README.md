@@ -37,13 +37,17 @@ refresh_token取得の説明が分かりにくかった場合はpixivpy製作者
 [https://gist.github.com/upbit/6edda27cb1644e94183291109b8a5fde](https://gist.github.com/upbit/6edda27cb1644e94183291109b8a5fde)
 
 ## Setting the key.py
-面倒ですがtwitterのデベロッパーアカウントが必要です. 頑張って英作文ガチャに成功してください. アプリケーションを作りAPI_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKENを書き換えてください.
-
 先程取得したrefresh_tokenとご自身のpixivのユーザーID (pixiv.net/users/?????/ の?????の部分の数字)でkey.pyとREFRESH_TOKENとUSER_IDを書き換えてください.
+
+面倒ですがtwitterのデベロッパーアカウントが必要です. 頑張って英作文ガチャに成功してください. アプリケーションを作りAPI_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKENを書き換えてください.
 
 ```python
 REFRESH_TOKEN = "Insert your refresh token."
 USER_ID = "Insert your pixiv user ID."
+API_KEY = "Insert your API key."
+API_SECRET_KEY = "Insert your API secret Key."
+ACCESS_TOKEN = "Insert your access token."
+SECRET_ACCESS_TOKEN = "Insert your secret access token."
 ```
 
 ## Start the follow
