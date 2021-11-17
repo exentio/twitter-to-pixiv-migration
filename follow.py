@@ -14,6 +14,7 @@ split_user_id = ''
 follow_user_id_list = []
 could_not_follow_user = []
 print_str = ''
+
 # フォローユーザーの取得
 following_user_id_list = twitter_api.friends_ids(search_user)
 
@@ -67,6 +68,7 @@ pixiv_api.auth(refresh_token=REFRESH_TOKEN)
 loop_count = 0
 print('フォローの開始')
 for item in follow_user_id_list:
+
   # 僕の高専の寮の回線が遅いので1回ごとに10秒sleep
   time.sleep(10)
   pixiv_api.user_follow_add(item)
