@@ -1,5 +1,3 @@
-REFRESH_TOKEN = "Insert your refresh token."
-USER_ID = "Insert your pixiv user ID."
 API_KEY = "Insert your API key."
 API_SECRET_KEY = "Insert your API secret Key"
 ACCESS_TOKEN = "Insert your access token"
