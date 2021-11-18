@@ -1,7 +1,8 @@
 import tweepy
 import datetime, time, re
+from gppt import GetPixivToken
 from pixivpy3 import AppPixivAPI
-from key import REFRESH_TOKEN, API_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKEN
+from key import API_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKEN
 
 # twitterの認証
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
@@ -60,9 +61,16 @@ for item in following_user_id_list:
       else:
         break
 
+# pixivのrefresh_tokenの取得
+g = GetPixivToken()
+
+# userにメールアドレス, pass_パスワードを入れる
+res = g.login(headless=True, user="ここにメールアドレスを入れる", pass_="ここにパスワードを入れる")
+refresh_token = res['refresh_token']
+
 # pixivの認証
 pixiv_api = AppPixivAPI()
-pixiv_api.auth(refresh_token=REFRESH_TOKEN)
+pixiv_api.auth(refresh_token=refresh_token)
 
 # pixivのフォロー
 loop_count = 0
