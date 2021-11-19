@@ -62,6 +62,7 @@ for item in following_user_id_list:
         break
 
 # pixivのrefresh_tokenの取得
+print('認証の開始')
 g = GetPixivToken()
 
 # userにメールアドレス, pass_パスワードを入れる
@@ -71,6 +72,7 @@ refresh_token = res['refresh_token']
 # pixivの認証
 pixiv_api = AppPixivAPI()
 pixiv_api.auth(refresh_token=refresh_token)
+print('認証終了')
 
 # pixivのフォロー
 loop_count = 0
