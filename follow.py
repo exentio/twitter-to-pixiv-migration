@@ -1,8 +1,11 @@
 import tweepy
 import datetime, time, re
+import sys
 from gppt import GetPixivToken
-from pixivpy3 import AppPixivAPI
+from pixivpy3 import AppPixivAPI, PixivError
 from config import API_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKEN, TWITTER_USER_HANDLE, PIXIV_EMAIL, PIXIV_PASSWORD
+
+sys.dont_write_bytecode = True
 
 # Twitter auth
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
@@ -16,13 +19,15 @@ could_not_follow_user = []
 print_str = ''
 
 # Retrieve follows
-following_user_id_list = twitter_api.friends_ids(TWITTER_USER_HANDLE)
+following_user_id_list = twitter_api.get_friend_ids(screen_name=TWITTER_USER_HANDLE)
 
-for item in following_user_id_list:
+print("Warning: users with a pixiv.me URL can't be automatically followed as for now.")
+
+for twitter_user_id in following_user_id_list:
   try:
     loop_count += 1
-    twitter_id = twitter_api.get_user(item).screen_name
-    user_profile = twitter_api.get_user(twitter_id)
+    twitter_id = twitter_api.get_user(user_id=twitter_user_id).screen_name
+    user_profile = twitter_api.get_user(screen_name=twitter_id)
 
     # Add to list only if they have a website in their profile
     if('url' in user_profile.entities):
@@ -39,18 +44,18 @@ for item in following_user_id_list:
 
         else:
           could_not_follow_user.append(twitter_id)
-          print_str = twitter_id + ' pixiv.me URL: ' + profile_website_url
+          print_str = twitter_id + ' has a pixiv.me URL: ' + profile_website_url
 
       else:
-        print_str = twitter_id
+        print_str = twitter_id + " has a non-Pixiv URL: " + profile_website_url
 
     else:
-      print_str = 'No website found: ' + twitter_id
+      print_str = twitter_id + ': no website found.'
 
-    print(str(loop_count) + '/' + str(len(following_user_id_list)) + ' ' + print_str)
+    print(str(loop_count) + '/' + str(len(following_user_id_list)) + '\t' + print_str)
     split_user_id = ''
 
-  except tweepy.TweepError as e:
+  except tweepy.TweepyException as e:
       print(e)
       if e.reason == "[{'message': 'Rate limit exceeded', 'code': 88}]":
         print('Rate limit exceeded, code: 88 -> Retrying in 15 minutes')
@@ -70,19 +75,30 @@ refresh_token = res['refresh_token']
 
 # Pixiv auth
 pixiv_api = AppPixivAPI()
-pixiv_api.auth(refresh_token=refresh_token)
+
+_e = None
+for _ in range(3):
+    try:
+        pixiv_api.auth(refresh_token=refresh_token)
+        break
+    except PixivError as e:
+        _e = e
+        print(e)
+        time.sleep(10)
+else:  # failed 3 times
+    raise _e
 print('Pixiv auth done.')
 
 # Pixiv following
 loop_count = 0
 print('Pixiv following begin.')
-for item in follow_user_id_list:
+for pixiv_id in follow_user_id_list:
 
   # 10 second sleep to avoid congestion
   time.sleep(10)
-  pixiv_api.user_follow_add(item)
+  pixiv_api.user_follow_add(int(pixiv_id))
   loop_count += 1
-  print(str(loop_count) + '/' + str(len(follow_user_id_list)) + ' ' + item)
+  print(str(loop_count) + '/' + str(len(follow_user_id_list)) + ' ' + pixiv_id)
 
 print("Coudln't automatically follow these Twitter users:")
 print(could_not_follow_user)

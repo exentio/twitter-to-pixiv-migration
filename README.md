@@ -1,11 +1,15 @@
 # Twitter to Pixiv migration tool
 
-# Requirements
+### Requirements
 * python3
 * pip3
 * python3-venv
 
-# Setup
+For the Pixiv follows, you'll also need to install Chromedriver. This step
+depends on your Linux distro. For Arch Linux, you can install the `chromedriver`
+AUR package (or `chromedriver-beta` if you use Google Chrome Beta).
+
+### Setup
 ```bash
 $ git clone https://github.com/exentio/twitter-to-pixiv-migration.git
 $ cd twitter-to-pixiv-migration
@@ -14,7 +18,7 @@ $ source venv/bin/activate # If you use fish, there's an activate.fish file too
 $ (venv) pip install -r requirements.txt
 ```
 
-## Configuration
+#### Configuration
 Create a config.py file with the following content and start adding your
 keys and login details:
 
@@ -33,7 +37,7 @@ A Twitter developer account is required, [get one here.](https://developer.twitt
 Create an application, get your app secrets, and set them as API_KEY,
 API_SECRET_KEY, ACCESS_TOKEN, and SECRET_ACCESS_TOKEN.  
 
-# Start migrating
+### Start migrating
 To start the tool, simply start the script in a terminal.
 
 ```bash
