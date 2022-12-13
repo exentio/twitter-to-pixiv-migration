@@ -12,9 +12,13 @@ $ cd twitter-to-pixiv-migration
 $ python3 -m venv venv
 $ source venv/bin/activate # If you use fish, there's an activate.fish file too
 $ (venv) pip install -r requirements.txt
+```
+
+The following change made by sed is unnecessary if you run Python 3.6 or lower, but if you run Python 3.7 or higher, it's needed due to `async` being changed into `async_`  -> [See this Tweepy issue](https://github.com/tweepy/tweepy/issues/1017)
+
+```bash
 $ sed -i 's/async/async_/g' venv/lib/python3.9/site-packages/tweepy/streaming.py
 ```
-The change made by sed is unnecessary if you run Python 3.6 or lower, but if you run Python 3.7 or higher, it's needed due to `async` being changed into `async_`  -> [See this Tweepy issue](https://github.com/tweepy/tweepy/issues/1017)
 
 ## Setting the key.py
 A Twitter developer account is required. Create an application, get your app secrets, and set them as API_KEY, API_SECRET_KEY, ACCESS_TOKEN, and SECRET_ACCESS_TOKEN in key.py.
