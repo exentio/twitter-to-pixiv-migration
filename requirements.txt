@@ -13,7 +13,7 @@ requests-toolbelt==0.9.1
 selenium==3.141.0
 six==1.16.0
 stdiomask==0.0.6
-tweepy==3.6.0
+tweepy==3.7.0
 types-requests==2.26.0
 types-selenium==3.141.3
 urllib3==1.26.4

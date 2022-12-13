@@ -2,14 +2,13 @@ import tweepy
 import datetime, time, re
 from gppt import GetPixivToken
 from pixivpy3 import AppPixivAPI
-from key import API_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKEN
+from config import API_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKEN, TWITTER_USER_HANDLE, PIXIV_EMAIL, PIXIV_PASSWORD
 
 # Twitter auth
 auth = tweepy.OAuthHandler(API_KEY, API_SECRET_KEY)
 auth.set_access_token(ACCESS_TOKEN, SECRET_ACCESS_TOKEN)
 twitter_api = tweepy.API(auth)
 
-search_user = 'Handle of the user without @'
 loop_count = 0
 split_user_id = ''
 follow_user_id_list = []
@@ -17,7 +16,7 @@ could_not_follow_user = []
 print_str = ''
 
 # Retrieve follows
-following_user_id_list = twitter_api.friends_ids(search_user)
+following_user_id_list = twitter_api.friends_ids(TWITTER_USER_HANDLE)
 
 for item in following_user_id_list:
   try:
@@ -66,7 +65,7 @@ print('Pixiv auth begin.')
 g = GetPixivToken()
 
 # Set your email address in "user" and your password in "pass_password
-res = g.login(headless=True, user="Pixiv email", pass_="Pixiv password")
+res = g.login(headless=True, user=PIXIV_EMAIL, pass_=PIXIV_PASSWORD)
 refresh_token = res['refresh_token']
 
 # Pixiv auth
