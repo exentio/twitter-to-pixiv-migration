@@ -1,24 +1,23 @@
-# follow-pixiv-account-from-twitter-profile
-指定したユーザーがフォローしているアカウントのTwitterプロフィールからpixivアカウントをフォローするやつ.
+# Twitter to Pixiv migration tool.
 
-# Requirement
+# Requirements
 * python3
 * pip3
 * python3-venv
 
 # Setup
 ```bash
-$ git clone https://github.com/addtobasic/afollow-pixiv-account-from-twitter-profile.git
-$ cd follow-pixiv-account-from-twitter-profile
+$ git clone https://github.com/exentio/twitter-to-pixiv-migration.git
+$ cd twitter-to-pixiv-migration
 $ python3 -m venv venv
-$ source venv/bin/activate
+$ source venv/bin/activate # If you use fish, there's an activate.fish file too
 $ (venv) pip install -r requirements.txt
 $ sed -i 's/async/async_/g' venv/lib/python3.9/site-packages/tweepy/streaming.py
 ```
-最後のsedコマンドによるパッケージの書き換えはpython3.6以下なら実行せずに動くが3.7以上の場合はasyncをasync_に書き換えなければならないため実行する必要があります -> [issuesを参照](https://github.com/tweepy/tweepy/issues/1017)
+The change made by sed is unnecessary if you run Python 3.6 or lower, but if you run Python 3.7 or higher, it's needed due to `async` being changed into `async_`  -> [See this Tweepy issue](https://github.com/tweepy/tweepy/issues/1017)
 
 ## Setting the key.py
-面倒ですがtwitterのデベロッパーアカウントが必要です. 頑張って英作文ガチャに成功してください. アプリケーションを作りAPI_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKENを書き換えてください.
+A Twitter developer account is required. Create an application, get your app secrets, and set them as API_KEY, API_SECRET_KEY, ACCESS_TOKEN, and SECRET_ACCESS_TOKEN in key.py.
 
 ```python
 API_KEY = "Insert your API key."
@@ -28,16 +27,14 @@ SECRET_ACCESS_TOKEN = "Insert your secret access token."
 ```
 
 ## Start following
-follow.pyの12行目に指定したユーザーのtwitterIDを, 69行目に自身のpixivのメールアドレスとパスワードを入力して, ターミナルで以下のコマンドを実行してください.
+Enter the Twitter handle (without the @) of your account, or the one of which you want to migrate from, in the 12th line of follow.py (variable named `search_user`), your Pixiv email address and password in the 69th line (variable named `res`), and execute the following commands in the terminal.
 
-上記の設定が終わればターミナルで下のコマンドを実行してください
 ```bash
-$ cd follow-pixiv-account-from-twitter-profile
+$ cd twitter-to-pixiv-migration
 $ python3 follow.py
 ```
-これでsearch_userに設定したtwitterアカウントがフォローしているユーザーのtwitterプロフィールのwebsiteにあるpixivアカウントをフォローできていると思います.
 
-pixivpyの仕様上, twitterに設定されたwebsiteがpixiv.meから始まるユーザーページだと直接フォローできないので最後にまとめて出力するようにしています
+Due to the current limitations of the pixivpy library, it's currently not possible to follow users who put a pixiv.me URL in their account.
 
 # References
 * https://github.com/upbit/pixivpy
