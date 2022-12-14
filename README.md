@@ -1,11 +1,9 @@
 # Twitter to Pixiv migration tool
 
 ### Disclaimer
-Due to the current limitations of the pixivpy library, at the moment it's not
-possible to follow users who put a pixiv.me URL in their account. As for now,
-the script only checks the website section of Twitter accounts. Many artists
-put their Pixiv links in their bio, and won't be parsed by the script. I'll be
-working on this.
+As for now, the script only checks the website section of Twitter accounts. Many
+artists put their Pixiv links in their bio, and won't be parsed by the script.
+I'll be working on this.
 
 ### Requirements
 * python3

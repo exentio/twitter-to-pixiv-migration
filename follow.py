@@ -1,6 +1,7 @@
 import tweepy
 import datetime, time, re
 import sys
+import requests
 from gppt import GetPixivToken
 from pixivpy3 import AppPixivAPI, PixivError
 from config import API_KEY, API_SECRET_KEY, ACCESS_TOKEN, SECRET_ACCESS_TOKEN, TWITTER_USER_HANDLE, PIXIV_EMAIL, PIXIV_PASSWORD
@@ -15,13 +16,10 @@ twitter_api = tweepy.API(auth)
 loop_count = 0
 split_user_id = ''
 follow_user_id_list = []
-could_not_follow_user = []
 print_str = ''
 
 # Retrieve follows
 following_user_id_list = twitter_api.get_friend_ids(screen_name=TWITTER_USER_HANDLE)
-
-print("Warning: users with a pixiv.me URL can't be automatically followed as for now.")
 
 for twitter_user_id in following_user_id_list:
   try:
@@ -35,16 +33,15 @@ for twitter_user_id in following_user_id_list:
       # Get url
       profile_website_url = user_profile.entities['url']['urls'][0]['expanded_url']
 
-      # pixiv.me urls are handled separately
       if 'pixiv' in profile_website_url:
-        if not ('pixiv.me' in profile_website_url):
-          split_user_id = re.sub(r"\D", "", profile_website_url)
-          follow_user_id_list.append(split_user_id)
-          print_str = twitter_id + ' ID: ' + split_user_id
+        # pixiv.me urls are handled separately
+        if ('pixiv.me' in profile_website_url):
+          # pixiv.me redirects to the actual url with an ID, this gets that redirect
+          profile_website_url = requests.get(profile_website_url).url
 
-        else:
-          could_not_follow_user.append(twitter_id)
-          print_str = twitter_id + ' has a pixiv.me URL: ' + profile_website_url
+        split_user_id = re.sub(r"\D", "", profile_website_url)
+        follow_user_id_list.append(split_user_id)
+        print_str = twitter_id + ' ID: ' + split_user_id
 
       else:
         print_str = twitter_id + " has a non-Pixiv URL: " + profile_website_url
@@ -100,5 +97,4 @@ for pixiv_id in follow_user_id_list:
   loop_count += 1
   print(str(loop_count) + '/' + str(len(follow_user_id_list)) + ' ' + pixiv_id)
 
-print("Coudln't automatically follow these Twitter users:")
-print(could_not_follow_user)
+print("All done!")
