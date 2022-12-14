@@ -104,14 +104,23 @@ print('Pixiv auth done.')
 
 # Pixiv following
 loop_count = 0
-print('\nPixiv following begin.\n')
+print('\nPixiv following begin.')
+print('This will take time, to avoid triggering Pixiv\'s rate limit.\n')
 for pixiv_id in follow_user_id_list:
 
-  # 10 second sleep to avoid congestion
-  time.sleep(10)
+  # 10 second sleep to avoid rate limit
+  for remaining in range(10, 0, -1):
+    sys.stdout.write("\r            \r")
+    sys.stdout.write("Waiting {:d}.".format(remaining))
+    sys.stdout.flush()
+    time.sleep(1)
+
   pixiv_api.user_follow_add(int(pixiv_id))
   loop_count += 1
-  print(str(loop_count) + '/' + str(len(follow_user_id_list)) + ' ' + pixiv_id)
+
+  sys.stdout.write("\r            \r")
+  sys.stdout.flush()
+  print(str(loop_count) + '/' + str(len(follow_user_id_list)) + '\t' + pixiv_id)
 
 if no_pixiv:
   print("\nThe following Twitter accounts don't have a Pixiv link in their profile:")
