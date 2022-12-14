@@ -17,6 +17,7 @@ loop_count = 0
 split_user_id = ''
 follow_user_id_list = []
 print_str = ''
+no_pixiv = []
 
 # Retrieve follows
 following_user_id_list = twitter_api.get_friend_ids(screen_name=TWITTER_USER_HANDLE)
@@ -28,26 +29,41 @@ for twitter_user_id in following_user_id_list:
     user_profile = twitter_api.get_user(screen_name=twitter_id)
 
     # Add to list only if they have a website in their profile
-    if('url' in user_profile.entities):
-
+    if 'url' in user_profile.entities:
       # Get url
       profile_website_url = user_profile.entities['url']['urls'][0]['expanded_url']
 
       if 'pixiv' in profile_website_url:
+        pixiv_url = profile_website_url
         # pixiv.me urls are handled separately
-        if ('pixiv.me' in profile_website_url):
+        if 'pixiv.me' in profile_website_url:
           # pixiv.me redirects to the actual url with an ID, this gets that redirect
-          profile_website_url = requests.get(profile_website_url).url
-
-        split_user_id = re.sub(r"\D", "", profile_website_url)
+          pixiv_url = requests.get(profile_website_url).url
+        split_user_id = re.sub(r"\D", "", pixiv_url)
         follow_user_id_list.append(split_user_id)
         print_str = twitter_id + ' ID: ' + split_user_id
 
-      else:
-        print_str = twitter_id + " has a non-Pixiv URL: " + profile_website_url
+    if 'description' in user_profile.entities and split_user_id == '':
+      # Get all urls in the profile bio
+      profile_desc_urls = user_profile.entities['description']['urls']
 
-    else:
-      print_str = twitter_id + ': no website found.'
+      if profile_desc_urls:
+        for tco_url in profile_desc_urls:
+          real_url = tco_url['expanded_url']
+
+          if "pixiv" in real_url:
+            # pixiv.me urls are handled separately
+            if 'pixiv.me' in real_url:
+              real_url = requests.get(real_url).url
+
+            split_user_id = re.sub(r"\D", "", real_url)
+            follow_user_id_list.append(split_user_id)
+            print_str = twitter_id + ' ID: ' + split_user_id
+            break
+
+    if split_user_id == '':
+      print_str = twitter_id + ': no Pixiv link found.'
+      no_pixiv.append(twitter_id)
 
     print(str(loop_count) + '/' + str(len(following_user_id_list)) + '\t' + print_str)
     split_user_id = ''
@@ -63,7 +79,7 @@ for twitter_user_id in following_user_id_list:
         break
 
 # Obtaining Pixiv token
-print('Pixiv auth begin.')
+print('\nPixiv auth begin.')
 g = GetPixivToken()
 
 # Set your email address in "user" and your password in "pass_password
@@ -88,7 +104,7 @@ print('Pixiv auth done.')
 
 # Pixiv following
 loop_count = 0
-print('Pixiv following begin.')
+print('\nPixiv following begin.\n')
 for pixiv_id in follow_user_id_list:
 
   # 10 second sleep to avoid congestion
@@ -97,4 +113,8 @@ for pixiv_id in follow_user_id_list:
   loop_count += 1
   print(str(loop_count) + '/' + str(len(follow_user_id_list)) + ' ' + pixiv_id)
 
-print("All done!")
+if no_pixiv:
+  print("\nThe following Twitter accounts don't have a Pixiv link in their profile:")
+  print(*no_pixiv)
+
+print("\nAll done!")
