@@ -19,6 +19,8 @@ follow_user_id_list = []
 print_str = ''
 no_pixiv = []
 
+login_time = 0
+
 # Retrieve follows
 following_user_id_list = twitter_api.get_friend_ids(screen_name=TWITTER_USER_HANDLE)
 
@@ -78,35 +80,39 @@ for twitter_user_id in following_user_id_list:
       else:
         break
 
-# Obtaining Pixiv token
-print('\nPixiv auth begin.')
+# Pixiv following
 g = GetPixivToken()
-
-# Set your email address in "user" and your password in "pass_password
-res = g.login(headless=True, user=PIXIV_EMAIL, pass_=PIXIV_PASSWORD)
-refresh_token = res['refresh_token']
-
-# Pixiv auth
 pixiv_api = AppPixivAPI()
 
-_e = None
-for _ in range(3):
-    try:
-        pixiv_api.auth(refresh_token=refresh_token)
-        break
-    except PixivError as e:
-        _e = e
-        print(e)
-        time.sleep(10)
-else:  # failed 3 times
-    raise _e
-print('Pixiv auth done.')
-
-# Pixiv following
-loop_count = 0
 print('\nPixiv following begin.')
-print('This will take time, to avoid triggering Pixiv\'s rate limit.\n')
+print('This will take time, to avoid triggering Pixiv\'s rate limit.')
+print('Due to the duration of a Pixiv session, the script may re-authenticate during the process.')
+
+loop_count = 0
+
+# Pixiv auth
 for pixiv_id in follow_user_id_list:
+
+  # Pixiv refresh tokens expire after 3600 seconds
+  if (login_time == 0) or ((time.time() - login_time) > 3200):
+    print('\nPixiv auth begin.')
+    login_time = time.time()
+    res = g.login(headless=True, user=PIXIV_EMAIL, pass_=PIXIV_PASSWORD)
+    refresh_token = res['refresh_token']
+
+    _e = None
+    for _ in range(3):
+        try:
+            pixiv_api.auth(refresh_token=refresh_token)
+            break
+        except PixivError as e:
+            _e = e
+            print(e)
+            time.sleep(10)
+    else:  # failed 3 times
+        raise _e
+    print('Pixiv auth done.\n')
+
 
   # 10 second sleep to avoid rate limit
   for remaining in range(10, 0, -1):
