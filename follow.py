@@ -110,14 +110,43 @@ for twitter_user_id in following_user_id_list:
     split_user_id = ''
 
   except tweepy.TweepyException as e:
-      print(e)
-      if e.reason == "[{'message': 'Rate limit exceeded', 'code': 88}]":
-        print('Rate limit exceeded, code: 88 -> Retrying in 15 minutes')
-        print(datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
-        time.sleep(60 * 15)
+    print(e)
+    if isinstance(e, tweepy.TooManyRequests):
+      print('Rate limit exceeded, code: 88 -> Retrying in 15 minutes')
+      print(datetime.now().strftime("%Y/%m/%d %H:%M:%S"))
+      time.sleep(60 * 15)
+    elif isinstance(e, tweepy.NotFound):
+      print(twitter_id + ": user not found.")
+    else:
+      break
 
-      else:
-        break
+# Log generation
+if follows_nopixiv:
+  print("\nThe following Twitter accounts don't have a Pixiv link in their profile:")
+  for nopixiv_user in follows_nopixiv:
+    print(nopixiv_user.twitter_handle, end = ' ')
+
+if prog_args.json or prog_args.csv:
+  time_now = datetime.now()
+  file_timestamp = time_now.strftime("%Y%m%d_%H%M%S")
+  follows_pixiv_asdict = [item._asdict() for item in follows_pixiv]
+  follows_nopixiv_asdict = [item._asdict() for item in follows_nopixiv]
+
+if prog_args.json:
+  with open(file_timestamp + '-pixiv.json', 'w', encoding='utf-8') as f:
+    json.dump(follows_pixiv_asdict, f, ensure_ascii=False, indent=4)
+  with open(file_timestamp + '-nopixiv.json', 'w', encoding='utf-8') as f:
+    json.dump(follows_nopixiv_asdict, f, ensure_ascii=False, indent=4)
+
+if prog_args.csv:
+  with open(file_timestamp + '-pixiv.csv', 'w', encoding='utf-8') as f:
+    csv_writer = csv.DictWriter(f, follows_pixiv[0]._asdict().keys())
+    csv_writer.writeheader()
+    csv_writer.writerows(follows_pixiv_asdict)
+  with open(file_timestamp + '-nopixiv.csv', 'w', encoding='utf-8') as f:
+    csv_writer = csv.DictWriter(f, follows_nopixiv[0]._asdict().keys())
+    csv_writer.writeheader()
+    csv_writer.writerows(follows_nopixiv_asdict)
 
 # Pixiv following
 g = GetPixivToken()
@@ -167,32 +196,5 @@ for pixiv_follow in follows_pixiv:
   sys.stdout.write("\r            \r")
   sys.stdout.flush()
   print(str(loop_count) + '/' + str(len(follows_pixiv)) + '\t' + pixiv_id)
-
-if follows_nopixiv:
-  print("\nThe following Twitter accounts don't have a Pixiv link in their profile:")
-  for nopixiv_user in follows_nopixiv:
-    print(nopixiv_user.twitter_handle, end = ' ')
-
-if prog_args.json or prog_args.csv:
-  time_now = datetime.now()
-  file_timestamp = time_now.strftime("%Y%m%d_%H%M%S")
-  follows_pixiv_asdict = [item._asdict() for item in follows_pixiv]
-  follows_nopixiv_asdict = [item._asdict() for item in follows_nopixiv]
-
-if prog_args.json:
-  with open(file_timestamp + '-pixiv.json', 'w', encoding='utf-8') as f:
-    json.dump(follows_pixiv_asdict, f, ensure_ascii=False, indent=4)
-  with open(file_timestamp + '-nopixiv.json', 'w', encoding='utf-8') as f:
-    json.dump(follows_nopixiv_asdict, f, ensure_ascii=False, indent=4)
-
-if prog_args.csv:
-  with open(file_timestamp + '-pixiv.csv', 'w', encoding='utf-8') as f:
-    csv_writer = csv.DictWriter(f, follows_pixiv[0]._asdict().keys())
-    csv_writer.writeheader()
-    csv_writer.writerows(follows_pixiv_asdict)
-  with open(file_timestamp + '-nopixiv.csv', 'w', encoding='utf-8') as f:
-    csv_writer = csv.DictWriter(f, follows_nopixiv[0]._asdict().keys())
-    csv_writer.writeheader()
-    csv_writer.writerows(follows_nopixiv_asdict)
 
 print("\nAll done!")
