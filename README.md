@@ -46,6 +46,16 @@ $ source venv/bin/activate
 $ python3 follow.py
 ```
 
+### Log output
+You can optionally enable logs in JSON and/or CSV using the flags `--json` and
+`--csv`. Both flags will generate two files, one for the accounts with a Pixiv
+URL in their profile, and one for those who have none. The first will contain
+their Twitter handle and their Pixiv ID, while the second will have their
+Twitter handle, their bio, and the URL they set as their website.  
+CSV is recommended as it can be opened with Excel or Google Sheets, but JSON
+may be more readable with a simple text editor. You have the choice, you can
+enable both at the same time.  
+
 # References
 * https://github.com/upbit/pixivpy
 * https://gist.github.com/upbit/6edda27cb1644e94183291109b8a5fde
