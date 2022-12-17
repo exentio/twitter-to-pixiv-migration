@@ -69,8 +69,10 @@ for twitter_user_id in following_user_id_list:
           # pixiv.me redirects to the actual url with an ID, this gets that redirect
           pixiv_url = requests.get(profile_website_url).url
         split_user_id = re.sub(r"\D", "", pixiv_url)
-        follows_pixiv.append(pixiv_follow(twitter_id, split_user_id))
-        print_str = twitter_id + ' ID: ' + split_user_id
+        # I once found a profile with an incomplete Pixiv URL, hence this
+        if split_user_id:
+          follows_pixiv.append(pixiv_follow(twitter_id, split_user_id))
+          print_str = twitter_id + ' ID: ' + split_user_id
 
     if 'description' in user_profile.entities and split_user_id == '':
       # Get all urls in the profile bio
@@ -98,7 +100,7 @@ for twitter_user_id in following_user_id_list:
             if not prog_args.json or not prog_args.csv:
               break
 
-    if split_user_id == '':
+    if not split_user_id:
       print_str = twitter_id + ': no Pixiv link found.'
 
       follows_nopixiv.append(no_pixiv_follow(
