@@ -94,8 +94,9 @@ for twitter_user_id in following_user_id_list:
               real_url = requests.get(real_url).url
 
             split_user_id = re.sub(r"\D", "", real_url)
-            follows_pixiv.append(pixiv_follow(twitter_id, split_user_id))
-            print_str = twitter_id + ' ID: ' + split_user_id
+            if split_user_id:
+              follows_pixiv.append(pixiv_follow(twitter_id, split_user_id))
+              print_str = twitter_id + ' ID: ' + split_user_id
             if not prog_args.json or not prog_args.csv:
               break
 
