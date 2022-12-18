@@ -1,7 +1,7 @@
 import time, sys
 import math
 import argparse
-import csv
+import csv, json
 from gppt import GetPixivToken
 from pixivpy3 import AppPixivAPI, PixivError
 from config import PIXIV_EMAIL, PIXIV_PASSWORD
@@ -18,14 +18,21 @@ argparser = argparse.ArgumentParser(
   usage='%(prog)s [options]',
   epilog='Code repo on: https://github.com/exentio/twitter-to-pixiv-migration')
 arg_group = argparser.add_mutually_exclusive_group(required=True)
+arg_group.add_argument('--text',
+  help='follow Pixiv IDs saved in a plain text file (one ID per line, no extra text)')
 arg_group.add_argument('--csv',
   help='follow Pixiv IDs saved in a CSV file (needs --key). If using files from follow.py, use "pixiv_id"')
+arg_group.add_argument('--json',
+  help='follow Pixiv IDs saved in a JSON file (needs --key). If using files from follow.py, use "pixiv_id"')
 argparser.add_argument('--key',
   help='column name (CSV) or key (JSON) with the Pixiv IDs.')
 prog_args = argparser.parse_args()
 
-if prog_args.csv and not prog_args.key:
+if (prog_args.json or prog_args.csv) and not prog_args.key:
   sys.exit("Column name/key not specified (use --key).")
+
+if prog_args.text and prog_args.key:
+  print("--text flag used, --key will be ignored.")
 
 if prog_args.csv:
   with open(prog_args.csv) as csv_file:
@@ -46,6 +53,12 @@ if prog_args.csv:
 
       else:
         pixiv_tofollow.append(row[relevant_column])
+
+if prog_args.json:
+  with open(prog_args.json) as json_file:
+    json_content = json.load(json_file)
+    for value in json_content:
+      pixiv_tofollow.append(value[prog_args.key])
 
 # Pixiv
 g = GetPixivToken()
