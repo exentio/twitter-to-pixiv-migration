@@ -56,6 +56,16 @@ CSV is recommended as it can be opened with Excel or Google Sheets, but JSON
 may be more readable with a simple text editor. You have the choice, you can
 enable both at the same time.  
 
+### Follow from file
+This can be useful in case the following process got interrupted, or if you
+have a list of Pixiv IDs for some reason. Launch the `follow_from_file.py`
+script and specify the file you're using with `--text` for a plain text file,
+ `--csv`, or `--json`; plain text files need to ONLY have one ID per line, no
+extra text or symbols, while CSV and JSON files need the argument `--key` to
+specify the field or key from which to get the values. When using the files
+produced by `follow.py`, the key is `pixiv_id`.  
+Disclaimer: as for now, only CSV imports are implemented.
+
 # References
 * https://github.com/upbit/pixivpy
 * https://gist.github.com/upbit/6edda27cb1644e94183291109b8a5fde
