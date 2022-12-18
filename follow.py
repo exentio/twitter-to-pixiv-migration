@@ -188,12 +188,6 @@ for index in range(pages):
   for x in raw_follows['user_previews']:
     current_follows.append(str(x['user']['id']))
 filtered_ids = [x.pixiv_id for x in follows_pixiv if x.pixiv_id not in current_follows]
-print('current follows')
-print(current_follows)
-print('to follow')
-print(follows_pixiv)
-print('filtered ids')
-print(filtered_ids)
 
 # Pixiv following
 loop_count = 0
