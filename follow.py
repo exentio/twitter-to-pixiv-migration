@@ -4,6 +4,7 @@ from datetime import datetime
 import argparse
 import requests
 import json, csv
+import math
 from collections import namedtuple
 from gppt import GetPixivToken
 from pixivpy3 import AppPixivAPI, PixivError
@@ -43,8 +44,6 @@ twitter_api = tweepy.API(auth)
 loop_count = 0
 split_user_id = ''
 print_str = ''
-
-login_time = 0
 
 # Retrieve follows
 following_user_id_list = twitter_api.get_friend_ids(screen_name=TWITTER_USER_HANDLE)
@@ -150,20 +149,55 @@ if prog_args.csv:
     csv_writer.writeheader()
     csv_writer.writerows(follows_nopixiv_asdict)
 
-# Pixiv following
+# Pixiv
 g = GetPixivToken()
 pixiv_api = AppPixivAPI()
+
+login_time = 0
+current_follows = []
 
 print('\nPixiv following begin.')
 print('This will take time, to avoid triggering Pixiv\'s rate limit.')
 print('Due to the duration of a Pixiv session, the script may re-authenticate during the process.')
 
+print('\nPixiv auth begin.')
+login_time = time.time()
+res = g.login(headless=True, user=PIXIV_EMAIL, pass_=PIXIV_PASSWORD)
+refresh_token = res['refresh_token']
+
+_e = None
+for _ in range(3):
+    try:
+        pixiv_api.auth(refresh_token=refresh_token)
+        break
+    except PixivError as e:
+        _e = e
+        print(e)
+        time.sleep(10)
+else:  # failed 3 times
+    raise _e
+print('Pixiv auth done.\n')
+
+# Filter follows to avoid unnecessary requests and waste less time
+# This one was pure pain
+user_details = pixiv_api.user_detail(res['user']['id'])
+# User follows are given in pages with 30 entries each
+pages = math.ceil((user_details['profile']['total_follow_users']) / 30)
+for index in range(pages):
+  raw_follows = pixiv_api.user_following(res['user']['id'], offset=(30 * index))
+  for x in raw_follows['user_previews']:
+    current_follows.append(str(x['user']['id']))
+filtered_ids = [x.pixiv_id for x in follows_pixiv if x.pixiv_id not in current_follows]
+print('current follows')
+print(current_follows)
+print('to follow')
+print(follows_pixiv)
+print('filtered ids')
+print(filtered_ids)
+
+# Pixiv following
 loop_count = 0
-
-# Pixiv
-for pixiv_follow in follows_pixiv:
-
-  pixiv_id = pixiv_follow.pixiv_id
+for pixiv_id in filtered_ids:
 
   # Pixiv refresh tokens expire after 3600 seconds
   if (login_time == 0) or ((time.time() - login_time) > 3200):
@@ -197,6 +231,6 @@ for pixiv_follow in follows_pixiv:
 
   sys.stdout.write("\r            \r")
   sys.stdout.flush()
-  print(str(loop_count) + '/' + str(len(follows_pixiv)) + '\t' + pixiv_id)
+  print(str(loop_count) + '/' + str(len(filtered_ids)) + '\t' + pixiv_id)
 
 print("\nAll done!")
