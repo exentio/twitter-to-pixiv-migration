@@ -60,11 +60,16 @@ if prog_args.json:
     for value in json_content:
       pixiv_tofollow.append(value[prog_args.key])
 
+if prog_args.text:
+  with open(prog_args.text) as text_file:
+    for line in text_file:
+        pixiv_tofollow.append(line.rstrip())
+
 # Pixiv
 g = GetPixivToken()
 pixiv_api = AppPixivAPI()
 
-print('\nPixiv following begin.')
+print('Pixiv following begin.')
 print('This will take time, to avoid triggering Pixiv\'s rate limit.')
 print('Due to the duration of a Pixiv session, the script may re-authenticate during the process.')
 

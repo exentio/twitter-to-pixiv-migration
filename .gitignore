@@ -6,3 +6,5 @@ lib
 test
 *.json
 *.csv
+*.txt
+!requirements.txt

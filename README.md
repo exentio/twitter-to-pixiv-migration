@@ -64,7 +64,6 @@ script and specify the file you're using with `--text` for a plain text file,
 extra text or symbols, while CSV and JSON files need the argument `--key` to
 specify the field or key from which to get the values. When using the files
 produced by `follow.py`, the key is `pixiv_id`.  
-**Disclaimer: as of now, plain text parsing is not implemented.**
 
 The JSON structure needs to be simple, as I can't implement an easy way to
 cycle inside a complex JSON file from just command line arguments.  
