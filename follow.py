@@ -228,4 +228,4 @@ for pixiv_id in filtered_ids:
   sys.stdout.flush()
   print(str(loop_count) + '/' + str(len(filtered_ids)) + '\t' + pixiv_id)
 
-print("\nAll done!")
+print("\nAll done! Consider launching scrape_fanbox.py (check README.md)")
