@@ -5,9 +5,11 @@
 * pip3
 * python3-venv
 
-For the Pixiv follows, you'll also need to install Chromedriver. This step
-depends on your Linux distro. For Arch Linux, you can install the `chromedriver`
-AUR package (or `chromedriver-beta` if you use Google Chrome Beta).
+For the Pixiv follows, you might also need to install Chromedriver, doesn't seem
+necessary on Windows. On Linux, this step depends on your Linux distro. For Arch
+Linux, you can install the `chromedriver` AUR package (or `chromedriver-beta` if
+you use Google Chrome Beta).  
+Should the script crash because of Selenium being missing, check [how to follow from log files](https://github.com/exentio/twitter-to-pixiv-migration#follow-from-file)
 
 ### Setup
 ```bash
