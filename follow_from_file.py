@@ -21,11 +21,11 @@ arg_group = argparser.add_mutually_exclusive_group(required=True)
 arg_group.add_argument('--text',
   help='follow Pixiv IDs saved in a plain text file (one ID per line, no extra text)')
 arg_group.add_argument('--csv',
-  help='follow Pixiv IDs saved in a CSV file (needs --key). If using files from follow.py, use "pixiv_id"')
+  help='follow Pixiv IDs saved in a CSV file (needs --key).')
 arg_group.add_argument('--json',
-  help='follow Pixiv IDs saved in a JSON file (needs --key). If using files from follow.py, use "pixiv_id"')
+  help='follow Pixiv IDs saved in a JSON file (needs --key).')
 argparser.add_argument('--key',
-  help='column name (CSV) or key (JSON) with the Pixiv IDs.')
+  help='column name (CSV) or key (JSON) with the Pixiv IDs. If using files from follow.py, use "pixiv_id"')
 prog_args = argparser.parse_args()
 
 if (prog_args.json or prog_args.csv) and not prog_args.key:

@@ -79,6 +79,15 @@ original script):
 ]
 ```
 
+### Scraping IDs from Fanbox
+Oh boy, this was A PAIN, and it'll eventually break. Anyway.  
+Launch `scrape_fanbox.py` and feed it a JSON with `--json` or a CSV with
+`--csv` specifying as many keys as needed with `--key` (type the arg once for
+each key, like this `--key twitter_bio --key twitter_url`), or a plaintext file
+that contains a Fanbox URL for each line. Selenium will scrape the page and the
+script will then start following them automatically. It'll also bypass R18
+popups, so **by using the script you state to be over 18 years old.**
+
 # References
 * https://github.com/upbit/pixivpy
 * https://gist.github.com/upbit/6edda27cb1644e94183291109b8a5fde
