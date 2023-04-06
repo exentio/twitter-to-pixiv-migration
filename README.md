@@ -1,5 +1,8 @@
 # Twitter to Pixiv migration tool
 
+### WARNING: due to Elon Musk, the Twitter APIs might stop working at any moment.
+### I'll eventually port the code to a scraper library that doesn't need API access.
+
 ### Requirements
 * python3
 * pip3
