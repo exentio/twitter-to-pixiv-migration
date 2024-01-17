@@ -7,4 +7,5 @@ test
 *.json
 *.csv
 *.txt
+*.log
 !requirements.txt

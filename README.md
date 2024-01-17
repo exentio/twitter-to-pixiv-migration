@@ -1,18 +1,17 @@
 # Twitter to Pixiv migration tool
 
-### WARNING: due to Elon Musk, the Twitter APIs might stop working at any moment.
-### I'll eventually port the code to a scraper library that doesn't need API access.
+### WARNING: the script relies on a scraper that might stop working at any moment.
 
 ### Requirements
 * python3
 * pip3
 * python3-venv
 
-For the Pixiv follows, you might also need to install Chromedriver, doesn't seem
-necessary on Windows. On Linux, this step depends on your Linux distro. For Arch
-Linux, you can install the `chromedriver` AUR package (or `chromedriver-beta` if
-you use Google Chrome Beta).  
-Should the script crash because of Selenium being missing, check [how to follow from log files](https://github.com/exentio/twitter-to-pixiv-migration#follow-from-file)
+For the Pixiv auto-following, you might also need to install Chromedriver,
+doesn't seem necessary on Windows, and new Selenium versions download it
+themselves but I've been having mixed results. On Linux, this step depends on
+your Linux distro. For Arch Linux, you can install the `chromedriver` AUR
+package (or `chromedriver-beta` if you use Google Chrome Beta).  
 
 ### Setup
 ```bash
@@ -24,23 +23,26 @@ $ (venv) pip install -r requirements.txt
 ```
 
 #### Configuration
-Create a config.py file with the following content and start adding your
+Create a `config.py` file with the following content and start adding your
 keys and login details:
 
 ```python
-API_KEY = "Insert your API key."
-API_SECRET_KEY = "Insert your API secret Key"
-ACCESS_TOKEN = "Insert your access token"
-SECRET_ACCESS_TOKEN = "Insert your secret access token"
-TWITTER_USER_HANDLE = "Insert your user handle without the @."
+TWITTER_AUTH_TOKEN = "Insert your auth token"
+TWITTER_USER_HANDLE = "Insert your user handle (or the handle to scrape) without the @."
 PIXIV_EMAIL = "Insert your Pixiv account's email."
 PIXIV_PASSWORD = "Insert your Pixiv account's password."
 
 ```
 
-A Twitter developer account is required, [get one here.](https://developer.twitter.com/en/portal/petition/essential/basic-info)
-Create an application, get your app secrets, and set them as API_KEY,
-API_SECRET_KEY, ACCESS_TOKEN, and SECRET_ACCESS_TOKEN.  
+To obtain a Twitter auth token, you need to open your browser's dev tools and
+look for the cookie named `auth_token`.  
+On Chrome, this is achieved by **pressing F12 > Application tab > Cookies >
+https://twitter.com**, on Firefox the process is the same but instead of
+**Application** you'll need to click on **Storage**.  
+
+**⚠️ WARNING: THE USE OF A SCRAPER HAS A NON-ZERO CHANCE OF RESULTING IN A BAN,
+SO IT'S SUGGESTED TO USE A DIFFERENT ACCOUNT FROM YOUR MAIN ONE.**
+I wouldn't say the chances are high, but better to be safe than sorry.
 
 ### Start migrating
 To start the tool, simply start the script in a terminal.
@@ -48,52 +50,47 @@ To start the tool, simply start the script in a terminal.
 ```bash
 $ cd twitter-to-pixiv-migration
 $ source venv/bin/activate
-$ python3 follow.py
+$ python3 migrate.py
 ```
 
-### Log output
-You can optionally enable logs in JSON and/or CSV using the flags `--json` and
-`--csv`. Both flags will generate two files, one for the accounts with a Pixiv
-URL in their profile, and one for those who have none. The first will contain
-their Twitter handle and their Pixiv ID, while the second will have their
-Twitter handle, their bio, and the URL they set as their website.  
-CSV is recommended as it can be opened with Excel or Google Sheets, but JSON
-may be more readable with a simple text editor. You have the choice, you can
-enable both at the same time.  
-
-### Follow from file
-This can be useful in case the following process got interrupted, or if you
-have a list of Pixiv IDs for some reason. Launch the `follow_from_file.py`
-script and specify the file you're using with `--text` for a plain text file,
- `--csv`, or `--json`; plain text files need to ONLY have one ID per line, no
-extra text or symbols, while CSV and JSON files need the argument `--key` to
-specify the field or key from which to get the values. When using the files
-produced by `follow.py`, the key is `pixiv_id`.  
-
-The JSON structure needs to be simple, as I can't implement an easy way to
-cycle inside a complex JSON file from just command line arguments.  
-Example of a JSON structure that has been tested (aka the output format of the
-original script):
+Launching the script with no arguments makes a full JSON dump of your Twitter
+followings, named `following-[timestamp].json`. You can then pass the `--raw-json <file>`
+argument to work on that file, without needing to re-scrape your account,
+although you'll need to do it to update the dump.  
+From there, the script will process the large dump in a more lightweight one
+that only contains the users' Twitter handles, display name, bio, and their
+URLs, and dump in in a `following-urls-[timestamp].json` file, which you can
+pass to the script with the `--urls-json <file>` argument, it should be faster
+to parse. You can also make your own JSON file of the second type by respecting
+this JSON structure:  
 ```json
 [
     {
-        "twitter_handle": "lalansane",
-        "pixiv_id": "4007933"
+        "user_handle": "uniunimikan",
+        "display_name": "✹🍊",
+        "user_bio": "うにみかん | https:\/\/t.co\/3BrWESR5Ei",
+        "urls": [
+            "https:\/\/lit.link\/uniunimikan",
+            "http:\/\/pixiv.me\/uniunimikan"
+        ]
     },
     ...
 ]
 ```
+Note: escaping is probably unnecessary, it worked for me with unescaped URLs,
+but still suggested to be on the safe side. Nothing prevents you to exploit
+this structure as needed.  
 
-### Scraping IDs from Fanbox
-Oh boy, this was A PAIN, and it'll eventually break. Anyway.  
-Launch `scrape_fanbox.py` and feed it a JSON with `--json` or a CSV with
-`--csv` specifying as many keys as needed with `--key` (type the arg once for
-each key, like this `--key twitter_bio --key twitter_url`), or a plaintext file
-that contains a Fanbox URL for each line. Selenium will scrape the page and the
-script will then start following them automatically. It'll also bypass R18
-popups, so **by using the script you state to be over 18 years old.**
+### Automatic scraping
+As of now, the script already scrapes Fanbox links for Pixiv URLs. I'm also
+planning to add scraping for the following websites:  
++ Potofu.me
++ Lit.link
++ Linktr.ee
++ Skeb.jp
++ Booth.pm
++ Fori.io/Foriio.com
 
-# References
-* https://github.com/upbit/pixivpy
-* https://gist.github.com/upbit/6edda27cb1644e94183291109b8a5fde
-* https://qiita.com/perlverity/items/a6bd388d96cb4ce69692
+The display name and bio are saved for other kinds of scraping, like emails or
+fediverse handles. I'm particularly interested in the latter but I don't know
+if I have the patience to implement it.
