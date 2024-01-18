@@ -82,12 +82,13 @@ but still suggested to be on the safe side. Nothing prevents you to exploit
 this structure as needed.  
 
 ### Automatic scraping
-As of now, the script already scrapes Fanbox links for Pixiv URLs. I'm also
-planning to add scraping for the following websites:  
-+ Potofu.me
-+ Lit.link
+As of now, the script already scrapes these websites for Pixiv IDs:  
++ Fanbox.cc
 + Linktr.ee
 + Skeb.jp
+I'm also planning to add scraping for the following websites:  
++ Potofu.me
++ Lit.link
 + Booth.pm
 + Fori.io/Foriio.com
 
