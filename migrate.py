@@ -35,6 +35,9 @@ arg_group.add_argument('--urls-json',
 arg_parser.add_argument('--log',
   action='store_true',
   help='Log every Pixiv ID and lack thereof while parsing.')
+arg_parser.add_argument('--no-headless',
+  action='store_true',
+  help='If you encounter issues with Pixiv auth, this might help. Be sure not to close the browser window and don\'t touch anything while it\'s open.')
 prog_args = arg_parser.parse_args()
 
 def datetime_handler(x):
@@ -339,7 +342,10 @@ print('Due to the duration of a Pixiv session, the script may re-authenticate du
 
 print('\nPixiv auth begin.')
 login_time = time.time()
-res = g.login(headless=True, username=PIXIV_EMAIL, password=PIXIV_PASSWORD)
+if prog_args.no_headless:
+  res = g.login(headless=False, username=PIXIV_EMAIL, password=PIXIV_PASSWORD)
+else:
+  res = g.login(headless=True, username=PIXIV_EMAIL, password=PIXIV_PASSWORD)
 refresh_token = res['refresh_token']
 
 _e = None

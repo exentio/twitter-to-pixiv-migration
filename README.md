@@ -81,6 +81,9 @@ Note: escaping is probably unnecessary, it worked for me with unescaped URLs,
 but still suggested to be on the safe side. Nothing prevents you to exploit
 this structure as needed.  
 
+Should the script fail to login on Pixiv, try launching it with the
+`--no-headless` argument.
+
 ### Automatic scraping
 As of now, the script already scrapes these websites for Pixiv IDs:  
 + Fanbox.cc
