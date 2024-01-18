@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
@@ -86,7 +86,7 @@ def pixiv_parser(url_to_parse):
   # pixiv.me urls are handled separately
   if 'pixiv.me' in url_to_parse:
     # pixiv.me redirects to the actual url with an ID
-    pixiv_url = requests.get(url_to_parse).url
+    pixiv_url = requests.get(url_to_parse).url # slow, maybe make async in the future
   scraped_id = re.sub(r"\D", "", pixiv_url)
   return scraped_id
 
@@ -150,6 +150,35 @@ def url_parsing(user_handle, user_urls, to_file=False):
       print(user_handle + " - no Pixiv found.")
 
 def clean_duplicates(found_handles):
+  for s_handle in found_handles:
+    for flw in follows_fanbox:
+      if flw.twitter_handle == s_handle:
+        follows_fanbox.remove(flw)
+        break
+    for flw in follows_potofu:
+      if flw.twitter_handle == s_handle:
+        follows_potofu.remove(flw)
+        break
+    for flw in follows_litlink:
+      if flw.twitter_handle == s_handle:
+        follows_litlink.remove(flw)
+        break
+    for flw in follows_linktree:
+      if flw.twitter_handle == s_handle:
+        follows_linktree.remove(flw)
+        break
+    for flw in follows_skeb:
+      if flw.twitter_handle == s_handle:
+        follows_skeb.remove(flw)
+        break
+    for flw in follows_booth:
+      if flw.twitter_handle == s_handle:
+        follows_booth.remove(flw)
+        break
+    for flw in follows_foriio:
+      if flw.twitter_handle == s_handle:
+        follows_foriio.remove(flw)
+        break
 
 if not prog_args.urls_json:
   for followed_acc in following_dump:
@@ -213,12 +242,12 @@ if follows_fanbox:
     failed = False
 
     try:
-      WebDriverWait(driver, 10).until(
+      WebDriverWait(driver, 3).until(
         EC.presence_of_element_located((By.XPATH, name_xpath)))
     except TimeoutException:
       try:
         # High chances of a 18+ warning popup
-        WebDriverWait(driver, 3).until(
+        WebDriverWait(driver, 7).until(
           EC.presence_of_element_located((By.XPATH, r18pop_xpath)))
         driver.find_element(By.XPATH, r18pop_xpath).click()
         WebDriverWait(driver, 3).until(
@@ -236,6 +265,7 @@ if follows_fanbox:
           found_handles.append(user.twitter_handle)
           if prog_args.log:
             print("Found ID: " + pixiv_id)
+  clean_duplicates(found_handles)
 
 # Linktree scraping
 if follows_linktree:
@@ -254,8 +284,10 @@ if follows_linktree:
       if 'pixiv' in p_link:
         pixiv_id = pixiv_parser(p_link)
         follows_pixiv.append(pixiv_id_follow(user.twitter_handle, pixiv_id))
+        found_handles.append(user.twitter_handle)
         if prog_args.log:
           print("Found ID: " + pixiv_id)
+  clean_duplicates(found_handles)
 
 # Skeb.jp scraping
 if follows_skeb:
@@ -271,22 +303,28 @@ if follows_skeb:
 
     try:
       WebDriverWait(driver, 3).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "is-pixiv")))
+        EC.presence_of_element_located((By.CLASS_NAME, "is-pixiv"))) # Slows the script down but also prevents rate limits
     except TimeoutException:
       try:
-        WebDriverWait(driver, 7).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "is-pixiv")))
-      except:
-        failed = True
+        driver.find_element(By.CLASS_NAME, "hero-foot")
+      except NoSuchElementException:
+        try:
+          WebDriverWait(driver, 7).until(
+          EC.presence_of_element_located((By.CLASS_NAME, "hero-foot")))
+          driver.find_element(By.CLASS_NAME, "is-pixiv")
+        except:
+          failed = True
 
     if not failed:
       try:
-        pixiv_id = driver.find_elements(By.CLASS_NAME, "is-pixiv")[0].text
+        pixiv_id = driver.find_element(By.CLASS_NAME, "is-pixiv").text
         follows_pixiv.append(pixiv_id_follow(user.twitter_handle, pixiv_id))
+        found_handles.append(user.twitter_handle)
         if prog_args.log:
           print("Found ID: " + pixiv_id)
-      except TimeoutException:
+      except:
         pass
+  clean_duplicates(found_handles)
 
 # Pixiv
 g = GetPixivToken()
