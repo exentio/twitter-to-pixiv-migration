@@ -207,6 +207,11 @@ else:
 
     url_parsing(c_handle, c_urls)
 
+found_handles = []
+for pixiv_handle in follows_pixiv:
+  found_handles.append(pixiv_handle.twitter_handle)
+clean_duplicates(found_handles)
+
 # Options for headless scraping
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")
@@ -330,7 +335,7 @@ if follows_skeb:
   clean_duplicates(found_handles)
 
 # Pixiv
-g = GetPixivToken()
+gppt = None
 pixiv_api = AppPixivAPI()
 
 login_time = 0
@@ -343,9 +348,10 @@ print('Due to the duration of a Pixiv session, the script may re-authenticate du
 print('\nPixiv auth begin.')
 login_time = time.time()
 if prog_args.no_headless:
-  res = g.login(headless=False, username=PIXIV_EMAIL, password=PIXIV_PASSWORD)
+  gppt = GetPixivToken(headless=False)
 else:
-  res = g.login(headless=True, username=PIXIV_EMAIL, password=PIXIV_PASSWORD)
+  gppt = GetPixivToken(headless=True)
+res = gppt.login(username=PIXIV_EMAIL, password=PIXIV_PASSWORD)
 refresh_token = res['refresh_token']
 
 _e = None
@@ -383,7 +389,7 @@ if len(filtered_ids) > 0:
     if (login_time == 0) or ((time.time() - login_time) > 3200):
       print('\nPixiv auth begin.')
       login_time = time.time()
-      res = g.login(headless=True, user=PIXIV_EMAIL, pass_=PIXIV_PASSWORD)
+      res = gppt.login(headless=True, user=PIXIV_EMAIL, pass_=PIXIV_PASSWORD)
       refresh_token = res['refresh_token']
 
       _e = None
