@@ -41,7 +41,7 @@ https://twitter.com**, on Firefox the process is the same but instead of
 **Application** you'll need to click on **Storage**.  
 
 **⚠️ WARNING: THE USE OF A SCRAPER HAS A NON-ZERO CHANCE OF RESULTING IN A BAN,
-SO IT'S SUGGESTED TO USE A DIFFERENT ACCOUNT FROM YOUR MAIN ONE.**
+SO IT'S SUGGESTED TO USE A DIFFERENT ACCOUNT FROM YOUR MAIN ONE.**  
 I wouldn't say the chances are high, but better to be safe than sorry.
 
 ### Start migrating
@@ -88,13 +88,14 @@ Should the script fail to login on Pixiv, try launching it with the
 As of now, the script already scrapes these websites for Pixiv IDs:  
 + Fanbox.cc
 + Linktr.ee
-+ Skeb.jp
++ Skeb.jp  
+
 I'm also planning to add scraping for the following websites:  
 + Potofu.me
 + Lit.link
 + Booth.pm
-+ Fori.io/Foriio.com
 + Profcard.info
++ Fori.io/Foriio.com
 
 The display name and bio are saved for other kinds of scraping, like emails or
 fediverse handles. I'm particularly interested in the latter but I don't know
