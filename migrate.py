@@ -72,6 +72,7 @@ follows_litlink = []
 follows_linktree = []
 follows_skeb = []
 follows_booth = []
+follows_profcard = []
 follows_foriio = []
 # All URLs, including the above
 follows_urls = []
@@ -122,6 +123,9 @@ def url_parsing(user_handle, user_urls, to_file=False):
       got_scrapeable = True
     elif 'booth.pm' in single_url:
       follows_booth.append(single_url_follow(user_handle, single_url))
+      got_scrapeable = True
+    elif 'profcard.io' in single_url:
+      follows_profcard.append(single_url_follow(user_handle, single_url))
       got_scrapeable = True
     elif 'fori.io' in single_url:
       follows_foriio.append(single_url_follow(user_handle, requests.get(single_url).url))
@@ -177,6 +181,10 @@ def clean_duplicates(found_handles):
     for flw in follows_booth:
       if flw.twitter_handle == s_handle:
         follows_booth.remove(flw)
+        break
+    for flw in follow_profcard:
+      if flw.twitter_handle == s_handle:
+        follow_profcard.remove(flw)
         break
     for flw in follows_foriio:
       if flw.twitter_handle == s_handle:

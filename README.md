@@ -94,6 +94,7 @@ I'm also planning to add scraping for the following websites:
 + Lit.link
 + Booth.pm
 + Fori.io/Foriio.com
++ Profcard.info
 
 The display name and bio are saved for other kinds of scraping, like emails or
 fediverse handles. I'm particularly interested in the latter but I don't know
