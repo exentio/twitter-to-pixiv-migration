@@ -182,9 +182,9 @@ def clean_duplicates(found_handles):
       if flw.twitter_handle == s_handle:
         follows_booth.remove(flw)
         break
-    for flw in follow_profcard:
+    for flw in follows_profcard:
       if flw.twitter_handle == s_handle:
-        follow_profcard.remove(flw)
+        follows_profcard.remove(flw)
         break
     for flw in follows_foriio:
       if flw.twitter_handle == s_handle:
