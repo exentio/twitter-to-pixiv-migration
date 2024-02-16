@@ -89,13 +89,11 @@ As of now, the script already scrapes these websites for Pixiv IDs:
 + Fanbox.cc
 + Linktr.ee
 + Skeb.jp  
-
-I'm also planning to add scraping for the following websites:  
-+ Potofu.me
 + Lit.link
-+ Booth.pm
++ Potofu.me
 + Profcard.info
 + Fori.io/Foriio.com
++ Booth.pm
 
 The display name and bio are saved for other kinds of scraping, like emails or
 fediverse handles. I'm particularly interested in the latter but I don't know

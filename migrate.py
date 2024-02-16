@@ -124,7 +124,7 @@ def url_parsing(user_handle, user_urls, to_file=False):
     elif 'booth.pm' in single_url:
       follows_booth.append(single_url_follow(user_handle, single_url))
       got_scrapeable = True
-    elif 'profcard.io' in single_url:
+    elif 'profcard.info' in single_url:
       follows_profcard.append(single_url_follow(user_handle, single_url))
       got_scrapeable = True
     elif 'fori.io' in single_url:
@@ -243,7 +243,7 @@ driver = webdriver.Chrome(
 found_handles = []
 # Fanbox scraping
 if follows_fanbox:
-  print("Begin Fanbox scraping.")
+  print("\nBegin Fanbox scraping.")
   name_xpath = '//*[@id="root"]/div[5]/div[1]/div/div[1]/div/div/div/div[2]/div/div[1]/h1/a'
   links_xpath = '//*[@id="root"]/div[5]/div[1]/div/div[1]/div/div/div/div[2]/div/div[1]/div/a'
   r18pop_xpath = '//*[@id="root"]/div[4]/div[2]/div/div/div/div[5]/button'
@@ -283,14 +283,12 @@ if follows_fanbox:
             print("Found ID: " + pixiv_id)
   clean_duplicates(found_handles)
 
-# Linktree scraping
-if follows_linktree:
-  print("Begin Linktree scraping.")
+def simple_link_scraper(follows_list):
   loop_count = 0
-  for user in follows_linktree:
+  for user in follows_list:
     if prog_args.log:
       loop_count += 1
-      print(str(loop_count) + '/' + str(len(follows_linktree)) + "\t" + user.url)
+      print(str(loop_count) + '/' + str(len(follows_list)) + "\t" + user.url)
 
     user_page = requests.get(user.url)
     soup = BeautifulSoup(user_page.content, "html.parser")
@@ -305,9 +303,96 @@ if follows_linktree:
           print("Found ID: " + pixiv_id)
   clean_duplicates(found_handles)
 
+# Linktree scraping
+if follows_linktree:
+  print("\nBegin Linktree scraping.")
+  simple_link_scraper(follows_linktree)
+
+# lit.link scraping
+if follows_litlink:
+  print("\nBegin lit.link scraping.")
+  loop_count = 0
+  for user in follows_litlink:
+    if prog_args.log:
+      loop_count += 1
+      print(str(loop_count) + '/' + str(len(follows_litlink)) + "\t" + user.url)
+
+    user_page = requests.get(user.url)
+    soup = BeautifulSoup(user_page.content, "html.parser")
+    raw_page_data = json.loads(soup.find("script", id="__NEXT_DATA__").decode_contents())
+    page_links = raw_page_data["props"]["pageProps"]["profile"]["profileLinks"]
+    for link in page_links:
+      if link["buttonLink"]:
+        p_link = link["buttonLink"]["url"]
+        if 'pixiv' in p_link:
+          pixiv_id = pixiv_parser(p_link)
+          follows_pixiv.append(pixiv_id_follow(user.twitter_handle, pixiv_id))
+          found_handles.append(user.twitter_handle)
+          if prog_args.log:
+            print("Found ID: " + pixiv_id)
+  clean_duplicates(found_handles)
+
+# Potofu scraping
+if follows_potofu:
+  print("\nBegin Potofu scraping.")
+  simple_link_scraper(follows_potofu)
+
+# Profcard scraping
+if follows_profcard:
+  print("\nBegin Profcard scraping.")
+  simple_link_scraper(follows_profcard)
+
+# Foriio scraping
+if follows_foriio:
+  print("\nBegin Foriio scraping.")
+  loop_count = 0
+  for user in follows_foriio:
+    if prog_args.log:
+      loop_count += 1
+      print(str(loop_count) + '/' + str(len(follows_foriio)) + "\t" + user.url)
+
+    user_page = requests.get(user.url)
+    soup = BeautifulSoup(user_page.content, "html.parser")
+    user_details = soup.select('div[class*="Profile__UserDetails"]')
+    for section in user_details:
+      page_links = section.find_all("a")
+      for link in page_links:
+        p_link = link.get("href")
+        if 'pixiv' in p_link:
+          pixiv_id = pixiv_parser(p_link)
+          follows_pixiv.append(pixiv_id_follow(user.twitter_handle, pixiv_id))
+          found_handles.append(user.twitter_handle)
+          if prog_args.log:
+            print("Found ID: " + pixiv_id)
+  clean_duplicates(found_handles)
+
+# Booth.pm scraping
+if follows_booth:
+  print("\nBegin Booth.pm scraping.")
+  loop_count = 0
+  for user in follows_booth:
+    if prog_args.log:
+      loop_count += 1
+      print(str(loop_count) + '/' + str(len(follows_booth)) + "\t" + user.url)
+
+    user_page = requests.get(user.url)
+    soup = BeautifulSoup(user_page.content, "html.parser")
+    user_details = soup.select('div[class*="booth-description"]')
+    for section in user_details:
+      page_links = section.find_all("a")
+      for link in page_links:
+        p_link = link.get("href")
+        if 'pixiv' in p_link:
+          pixiv_id = pixiv_parser(p_link)
+          follows_pixiv.append(pixiv_id_follow(user.twitter_handle, pixiv_id))
+          found_handles.append(user.twitter_handle)
+          if prog_args.log:
+            print("Found ID: " + pixiv_id)
+  clean_duplicates(found_handles)
+
 # Skeb.jp scraping
 if follows_skeb:
-  print("Begin Skeb scraping.")
+  print("\nBegin Skeb scraping.")
   loop_count = 0
   for user in follows_skeb:
     if prog_args.log:
@@ -343,90 +428,93 @@ if follows_skeb:
   clean_duplicates(found_handles)
 
 # Pixiv
-gppt = None
-pixiv_api = AppPixivAPI()
+if follows_pixiv:
+  gppt = None
+  pixiv_api = AppPixivAPI()
 
-login_time = 0
-current_follows = []
+  login_time = 0
+  current_follows = []
 
-print('\nPixiv following begin.')
-print('This will take time, to avoid triggering Pixiv\'s rate limit.')
-print('Due to the duration of a Pixiv session, the script may re-authenticate during the process.')
+  print('\nPixiv following begin.')
+  print('This will take time, to avoid triggering Pixiv\'s rate limit.')
+  print('Due to the duration of a Pixiv session, the script may re-authenticate during the process.')
 
-print('\nPixiv auth begin.')
-login_time = time.time()
-if prog_args.no_headless:
-  gppt = GetPixivToken(headless=False)
+  print('\nPixiv auth begin.')
+  login_time = time.time()
+  if prog_args.no_headless:
+    gppt = GetPixivToken(headless=False)
+  else:
+    gppt = GetPixivToken(headless=True)
+  res = gppt.login(username=PIXIV_EMAIL, password=PIXIV_PASSWORD)
+  refresh_token = res['refresh_token']
+
+  _e = None
+  for _ in range(3):
+      try:
+          pixiv_api.auth(refresh_token=refresh_token)
+          break
+      except PixivError as e:
+          _e = e
+          print(e)
+          time.sleep(10)
+  else:  # failed 3 times
+      raise _e
+  print('Pixiv auth done.\n')
+
+  # Filter follows to avoid unnecessary requests and waste less time
+  # This one was pure pain
+  user_details = pixiv_api.user_detail(res['user']['id'])
+  # User follows are given in pages with 30 entries each
+  pages = math.ceil((user_details['profile']['total_follow_users']) / 30)
+  for index in range(pages):
+    raw_follows = pixiv_api.user_following(res['user']['id'], offset=(30 * index))
+    for x in raw_follows['user_previews']:
+      current_follows.append(str(x['user']['id']))
+  filtered_ids = [x.pixiv_id for x in follows_pixiv if x.pixiv_id not in current_follows]
+  # Remove duplicates
+  filtered_ids = list(set(filtered_ids))
+
+  # Pixiv following
+  if len(filtered_ids) > 0:
+    loop_count = 0
+    for pixiv_id in filtered_ids:
+
+      # Pixiv refresh tokens expire after 3600 seconds
+      if (login_time == 0) or ((time.time() - login_time) > 3200):
+        print('\nPixiv auth begin.')
+        login_time = time.time()
+        res = gppt.login(headless=True, user=PIXIV_EMAIL, pass_=PIXIV_PASSWORD)
+        refresh_token = res['refresh_token']
+
+        _e = None
+        for _ in range(3):
+            try:
+                pixiv_api.auth(refresh_token=refresh_token)
+                break
+            except PixivError as e:
+                _e = e
+                print(e)
+                time.sleep(10)
+        else:  # failed 3 times
+            raise _e
+        print('Pixiv auth done.\n')
+
+      # 10 second sleep to avoid rate limit
+      for remaining in range(10, 0, -1):
+        sys.stdout.write("\r            \r")
+        sys.stdout.write("Waiting {:d}.".format(remaining))
+        sys.stdout.flush()
+        time.sleep(1)
+
+      pixiv_api.user_follow_add(int(pixiv_id))
+      if prog_args.log:
+        loop_count += 1
+        sys.stdout.write("\r            \r")
+        sys.stdout.flush()
+        print(str(loop_count) + '/' + str(len(filtered_ids)) + '\t' + pixiv_id)
+  else:
+    print("\nNothing to follow!")
+
+  print("\nAll done!")
 else:
-  gppt = GetPixivToken(headless=True)
-res = gppt.login(username=PIXIV_EMAIL, password=PIXIV_PASSWORD)
-refresh_token = res['refresh_token']
-
-_e = None
-for _ in range(3):
-    try:
-        pixiv_api.auth(refresh_token=refresh_token)
-        break
-    except PixivError as e:
-        _e = e
-        print(e)
-        time.sleep(10)
-else:  # failed 3 times
-    raise _e
-print('Pixiv auth done.\n')
-
-# Filter follows to avoid unnecessary requests and waste less time
-# This one was pure pain
-user_details = pixiv_api.user_detail(res['user']['id'])
-# User follows are given in pages with 30 entries each
-pages = math.ceil((user_details['profile']['total_follow_users']) / 30)
-for index in range(pages):
-  raw_follows = pixiv_api.user_following(res['user']['id'], offset=(30 * index))
-  for x in raw_follows['user_previews']:
-    current_follows.append(str(x['user']['id']))
-filtered_ids = [x.pixiv_id for x in follows_pixiv if x.pixiv_id not in current_follows]
-# Remove duplicates
-filtered_ids = list(set(filtered_ids))
-
-# Pixiv following
-if len(filtered_ids) > 0:
-  loop_count = 0
-  for pixiv_id in filtered_ids:
-
-    # Pixiv refresh tokens expire after 3600 seconds
-    if (login_time == 0) or ((time.time() - login_time) > 3200):
-      print('\nPixiv auth begin.')
-      login_time = time.time()
-      res = gppt.login(headless=True, user=PIXIV_EMAIL, pass_=PIXIV_PASSWORD)
-      refresh_token = res['refresh_token']
-
-      _e = None
-      for _ in range(3):
-          try:
-              pixiv_api.auth(refresh_token=refresh_token)
-              break
-          except PixivError as e:
-              _e = e
-              print(e)
-              time.sleep(10)
-      else:  # failed 3 times
-          raise _e
-      print('Pixiv auth done.\n')
-
-    # 10 second sleep to avoid rate limit
-    for remaining in range(10, 0, -1):
-      sys.stdout.write("\r            \r")
-      sys.stdout.write("Waiting {:d}.".format(remaining))
-      sys.stdout.flush()
-      time.sleep(1)
-
-    pixiv_api.user_follow_add(int(pixiv_id))
-    if prog_args.log:
-      loop_count += 1
-      sys.stdout.write("\r            \r")
-      sys.stdout.flush()
-      print(str(loop_count) + '/' + str(len(filtered_ids)) + '\t' + pixiv_id)
-else:
-  print("Nothing to follow!")
-
-print("\nAll done!")
+  print("\nNothing to follow on Pixiv!")
