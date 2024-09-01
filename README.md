@@ -97,4 +97,4 @@ As of now, the script already scrapes these websites for Pixiv IDs:
 
 The display name and bio are saved for other kinds of scraping, like emails or
 fediverse handles. I'm particularly interested in the latter but I don't know
-if I have the patience to implement it.
+if I have the patience to implement it. I will try to take them from Skeb tho.

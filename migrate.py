@@ -240,6 +240,8 @@ driver = webdriver.Chrome(
   service=Service(ChromeDriverManager().install()),
   options=options)
 
+user_agent = driver.execute_script("return navigator.userAgent;")
+
 found_handles = []
 # Fanbox scraping
 if follows_fanbox:
@@ -312,19 +314,25 @@ if follows_linktree:
 if follows_litlink:
   print("\nBegin lit.link scraping.")
   loop_count = 0
+
   for user in follows_litlink:
     if prog_args.log:
       loop_count += 1
       print(str(loop_count) + '/' + str(len(follows_litlink)) + "\t" + user.url)
 
-    user_page = requests.get(user.url)
+
+    request_headers = {
+      'user-agent': user_agent
+    }
+
+    user_page = requests.get(user.url, headers=request_headers)
     soup = BeautifulSoup(user_page.content, "html.parser")
     raw_page_data = json.loads(soup.find("script", id="__NEXT_DATA__").decode_contents())
     page_links = raw_page_data["props"]["pageProps"]["profile"]["profileLinks"]
     for link in page_links:
       if link["buttonLink"]:
         p_link = link["buttonLink"]["url"]
-        if 'pixiv' in p_link:
+        if p_link and 'pixiv' in p_link:
           pixiv_id = pixiv_parser(p_link)
           follows_pixiv.append(pixiv_id_follow(user.twitter_handle, pixiv_id))
           found_handles.append(user.twitter_handle)
